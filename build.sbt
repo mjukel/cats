@@ -1,7 +1,7 @@
 import microsites._
 import ReleaseTransformations._
 import scala.xml.transform.{RewriteRule, RuleTransformer}
-import org.scalajs.sbtplugin.cross.CrossProject
+import sbtcrossproject.CrossPlugin.autoImport.{crossProject, CrossType}
 
 lazy val scoverageSettings = Seq(
   coverageMinimum := 60,
@@ -39,8 +39,8 @@ lazy val commonSettings = Seq(
     Resolver.sonatypeRepo("snapshots")
   ),
   libraryDependencies ++= Seq(
-    "com.github.mpilquist" %%% "simulacrum" % "0.12.0" % CompileTime,
-    "org.typelevel" %%% "machinist" % "0.6.4",
+    "com.github.mpilquist" %%% "simulacrum" % "0.13.0-KH" % CompileTime,
+    "org.typelevel" %%% "machinist" % "0.6.6-SNAPSHOT",
     compilerPlugin("org.scalamacros" %% "paradise" % "2.1.0" cross CrossVersion.patch),
     compilerPlugin("org.spire-math" %% "kind-projector" % "0.9.6")
   ),
@@ -77,7 +77,7 @@ lazy val commonJsSettings = Seq(
   parallelExecution := false,
   jsEnv := new org.scalajs.jsenv.nodejs.NodeJSEnv(),
   // batch mode decreases the amount of memory needed to compile scala.js code
-  scalaJSOptimizerOptions := scalaJSOptimizerOptions.value.withBatchMode(isTravisBuild.value),
+  scalaJSLinkerConfig := scalaJSLinkerConfig.value.withBatchMode(isTravisBuild.value),
   // currently sbt-doctest doesn't work in JS builds
   // https://github.com/tkawachi/sbt-doctest/issues/52
   doctestGenTests := Seq.empty
@@ -101,17 +101,17 @@ lazy val includeGeneratedSrc: Setting[_] = {
 
 lazy val catsSettings = commonSettings ++ publishSettings ++ scoverageSettings ++ javadocSettings
 
-lazy val scalaCheckVersion = "1.13.5"
+lazy val scalaCheckVersion = "1.14.1-SNAPSHOT-KH"
 // 2.13.0-M3 workaround
-//lazy val scalaTestVersion = "3.0.5"
-lazy val disciplineVersion = "0.9.0"
-lazy val catalystsVersion = "0.6"
+//lazy val scalaTestVersion = "3.1.0-SNAP7"
+lazy val disciplineVersion = "0.10.1-KH"
+lazy val catalystsVersion = "0.7-SNAPSHOT"
 
 // 2.13.0-M3 workaround
 def scalatestVersion(scalaVersion: String): String =
   CrossVersion.partialVersion(scalaVersion) match {
     case Some((2, 13)) =>  "3.0.5-M1"
-    case _ => "3.0.5"
+    case _ => "3.1.0-KH"
   }
 
 lazy val disciplineDependencies = Seq(
@@ -332,8 +332,6 @@ lazy val core = crossProject.crossType(CrossType.Pure)
   .settings(catsSettings)
   .settings(sourceGenerators in Compile += (sourceManaged in Compile).map(Boilerplate.gen).taskValue)
   .settings(includeGeneratedSrc)
-  .configureCross(disableScoverage210Jvm)
-  .configureCross(disableScoverage210Js)
   .settings(libraryDependencies += "org.scalacheck" %%% "scalacheck" % scalaCheckVersion % "test")
   .jsSettings(commonJsSettings)
   .jvmSettings(commonJvmSettings ++ mimaSettings("cats-core") )
@@ -346,7 +344,6 @@ lazy val laws = crossProject.crossType(CrossType.Pure)
   .settings(moduleName := "cats-laws", name := "Cats laws")
   .settings(catsSettings)
   .settings(disciplineDependencies)
-  .configureCross(disableScoverage210Jvm)
   .settings(testingDependencies)
   .jsSettings(commonJsSettings)
   .jvmSettings(commonJvmSettings)
@@ -696,30 +693,8 @@ lazy val credentialSettings = Seq(
   } yield Credentials("Sonatype Nexus Repository Manager", "oss.sonatype.org", username, password)).toSeq
 )
 
-def disableScoverage210Js(crossProject: CrossProject) =
-  crossProject
-  .jsSettings(
-    coverageEnabled := {
-      CrossVersion.partialVersion(scalaVersion.value) match {
-        case Some((2, 10)) => false
-        case _ => coverageEnabled.value
-      }
-    }
-  )
-
 def disableScoverage210Js: Project ⇒ Project = p =>
   p.settings(
-    coverageEnabled := {
-      CrossVersion.partialVersion(scalaVersion.value) match {
-        case Some((2, 10)) => false
-        case _ => coverageEnabled.value
-      }
-    }
-  )
-
-def disableScoverage210Jvm(crossProject: CrossProject) =
-  crossProject
-  .jvmSettings(
     coverageEnabled := {
       CrossVersion.partialVersion(scalaVersion.value) match {
         case Some((2, 10)) => false

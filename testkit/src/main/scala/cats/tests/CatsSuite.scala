@@ -5,7 +5,8 @@ import catalysts.Platform
 import cats.instances.{AllInstances, AllInstancesBinCompat0}
 import cats.syntax.{AllSyntax, AllSyntaxBinCompat0, AllSyntaxBinCompat1, EqOps}
 import org.scalactic.anyvals.{PosInt, PosZDouble, PosZInt}
-import org.scalatest.{FunSuite, FunSuiteLike, Matchers}
+import org.scalatest.Matchers
+import org.scalatest.funsuite.{AnyFunSuite, AnyFunSuiteLike}
 import org.scalatest.prop.{Configuration, GeneratorDrivenPropertyChecks}
 import org.typelevel.discipline.scalatest.Discipline
 
@@ -28,14 +29,14 @@ trait TestSettings extends Configuration with Matchers {
  * An opinionated stack of traits to improve consistency and reduce
  * boilerplate in Cats tests.
  */
-trait CatsSuite extends FunSuite
+trait CatsSuite extends AnyFunSuite
     with Matchers
     with GeneratorDrivenPropertyChecks
     with Discipline
     with TestSettings
     with AllInstances with AllInstancesBinCompat0
     with AllSyntax with AllSyntaxBinCompat0 with AllSyntaxBinCompat1
-    with StrictCatsEquality { self: FunSuiteLike =>
+    with StrictCatsEquality { self: AnyFunSuiteLike =>
 
   implicit override val generatorDrivenConfig: PropertyCheckConfiguration =
     checkConfiguration
