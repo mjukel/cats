@@ -40,7 +40,7 @@ lazy val commonSettings = Seq(
   ),
   libraryDependencies ++= Seq(
     "com.github.mpilquist" %%% "simulacrum" % "0.13.0-KH" % CompileTime,
-    "org.typelevel" %%% "machinist" % "0.6.6-SNAPSHOT",
+    "org.typelevel" %%% "machinist" % "0.6.6-KH",
     compilerPlugin("org.scalamacros" %% "paradise" % "2.1.0" cross CrossVersion.patch),
     compilerPlugin("org.spire-math" %% "kind-projector" % "0.9.6")
   ),
@@ -105,7 +105,7 @@ lazy val scalaCheckVersion = "1.14.1-SNAPSHOT-KH"
 // 2.13.0-M3 workaround
 //lazy val scalaTestVersion = "3.1.0-SNAP7"
 lazy val disciplineVersion = "0.10.1-KH"
-lazy val catalystsVersion = "0.7-SNAPSHOT"
+lazy val catalystsVersion = "0.7-KH"
 
 // 2.13.0-M3 workaround
 def scalatestVersion(scalaVersion: String): String =
